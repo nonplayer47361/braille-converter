@@ -10,7 +10,6 @@ class TestEnglishE2E(unittest.TestCase):
     def test_numbers_and_punct(self):
         txt = "Test, 123!"
         b = text_to_braille(txt, lang="eng")
-        # spaces skipped, number indicator + patterns for digits, punctuation preserved
         decoded = braille_to_text(b, lang="eng")
         self.assertEqual(decoded, "Test,123!")
 

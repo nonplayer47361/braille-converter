@@ -3,7 +3,7 @@
 install_braille_ctb_files.py
 
 Fetches upstream liblouis CTB/CTI tables and installs them under
-braille_converter/liblouis_translator/{common,english,korean}.
+braille_converter/liblouis_translator/{english,korean,common}.
 """
 
 import sys
