@@ -1,35 +1,70 @@
-# Grade-1 English Braille manual base mappings
+# dual mapping table for Grade-1 English Braille
 
-# lowercase letters a–z
-LETTERS = {
-    'a': '1',   'b': '12',  'c': '14',   'd': '145',  'e': '15',
-    'f': '124', 'g': '1245','h': '125',  'i': '24',   'j': '245',
-    'k': '13',  'l': '123', 'm': '134',  'n': '1345', 'o': '135',
-    'p': '1234','q': '12345','r': '1235', 's': '234',  't': '2345',
-    'u': '136', 'v': '1236','w': '2456', 'x': '1346', 'y': '13456',
-    'z': '1356'
+from typing import Literal
+
+Form = Literal['unicode', 'dots']
+
+CAPITAL_INDICATOR: dict[Form,str] = {
+    'unicode': '⠠',
+    'dots':    '6'
+}
+NUMERIC_INDICATOR: dict[Form,str] = {
+    'unicode': '⠼',
+    'dots':    '3456'
 }
 
-# capitalization indicator (dot-6)
-CAPITAL_IND = '6'
+# a–z, 1–0, punctuation
+MAPPING: dict[str, dict[Form,str]] = {
+    # letters
+    'a': {'unicode':'⠁','dots':'1'},    'b': {'unicode':'⠃','dots':'12'},
+    'c': {'unicode':'⠉','dots':'14'},   'd': {'unicode':'⠙','dots':'145'},
+    'e': {'unicode':'⠑','dots':'15'},   'f': {'unicode':'⠋','dots':'124'},
+    'g': {'unicode':'⠛','dots':'1245'}, 'h': {'unicode':'⠓','dots':'125'},
+    'i': {'unicode':'⠊','dots':'24'},   'j': {'unicode':'⠚','dots':'245'},
+    'k': {'unicode':'⠅','dots':'13'},   'l': {'unicode':'⠇','dots':'123'},
+    'm': {'unicode':'⠍','dots':'134'},  'n': {'unicode':'⠝','dots':'1345'},
+    'o': {'unicode':'⠕','dots':'135'},  'p': {'unicode':'⠏','dots':'1234'},
+    'q': {'unicode':'⠟','dots':'12345'},'r': {'unicode':'⠗','dots':'1235'},
+    's': {'unicode':'⠎','dots':'234'},  't': {'unicode':'⠞','dots':'2345'},
+    'u': {'unicode':'⠥','dots':'136'},  'v': {'unicode':'⠧','dots':'1236'},
+    'w': {'unicode':'⠺','dots':'2456'},'x': {'unicode':'⠭','dots':'1346'},
+    'y': {'unicode':'⠽','dots':'13456'},'z': {'unicode':'⠵','dots':'1356'},
 
-# number indicator (dots 3-4-5-6)
-NUMBER_IND = '3456'
-# digits 1–0 map to same patterns as 'a'–'j'
-NUMBERS = {
-    '1': '1',  '2': '12', '3': '14',  '4': '145', '5': '15',
-    '6': '124','7': '1245','8': '125','9': '24',  '0': '245'
+    # digits (reuse a–j patterns)
+    '1': {'unicode':'⠁','dots':'1'},   '2': {'unicode':'⠃','dots':'12'},
+    '3': {'unicode':'⠉','dots':'14'},  '4': {'unicode':'⠙','dots':'145'},
+    '5': {'unicode':'⠑','dots':'15'},  '6': {'unicode':'⠋','dots':'124'},
+    '7': {'unicode':'⠛','dots':'1245'},'8': {'unicode':'⠓','dots':'125'},
+    '9': {'unicode':'⠊','dots':'24'},  '0': {'unicode':'⠚','dots':'245'},
+
+    # punctuation & common symbols
+    ',': {'unicode':'⠂','dots':'2'},   ';': {'unicode':'⠆','dots':'23'},
+    ':': {'unicode':'⠒','dots':'25'},  '.': {'unicode':'⠲','dots':'256'},
+    '?': {'unicode':'⠦','dots':'236'}, '!': {'unicode':'⠖','dots':'235'},
+    '(': {'unicode':'⠶','dots':'236'}, ')': {'unicode':'⠶','dots':'356'},
+    "'": {'unicode':'⠄','dots':'3'},   '-': {'unicode':'⠤','dots':'36'},
+    '"': {'unicode':'⠶','dots':'356'}, '/': {'unicode':'⠌','dots':'456'},
+    '@': {'unicode':'⠈','dots':'7'},   '&': {'unicode':'⠯','dots':'256'},
+    '#': {'unicode':'⠼','dots':'3456'},'*': {'unicode':'⠔','dots':'356'},
+    '+': {'unicode':'⠖','dots':'235'}, '=': {'unicode':'⠶','dots':'236'},
 }
 
-# common punctuation in Grade-1
-PUNCT = {
-    ',': '2',   ';': '23',  ':': '25',  '.': '256',
-    '?': '236', '!': '235',  '\'':'3',   '-': '36',
-    '"': '356', '(': '236',  ')': '356'
-}
+def get_mapping(ch: str, form: Form='unicode') -> str:
+    """
+    Return the Braille cell(s) for character ch.
+    - supports uppercase (prepends CAPITAL_INDICATOR)
+    - supports digits (prepends NUMERIC_INDICATOR)
+    - if ch not in mapping, returns ch unchanged.
+    """
+    out = []
+    if ch.isupper():
+        out.append(CAPITAL_INDICATOR[form])
+        ch = ch.lower()
 
-# combine into one base mapping
-BASE = {}
-BASE.update(LETTERS)
-BASE.update(NUMBERS)
-BASE.update(PUNCT)
+    if ch.isdigit():
+        out.append(NUMERIC_INDICATOR[form])
+        out.append(MAPPING.get(ch, {form:ch})[form])
+    else:
+        out.append(MAPPING.get(ch, {form:ch})[form])
+
+    return ''.join(out)
