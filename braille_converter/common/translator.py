@@ -1,3 +1,4 @@
+import re
 from .loader import load_table
 from .braille_unicode_map import pattern_to_unicode, unicode_to_pattern
 
@@ -21,7 +22,6 @@ def braille_to_text(braille: str, lang: str) -> str:
     Handles multi-cell patterns (e.g. capitalization or number indicators).
     """
     tbl = load_table(lang)
-    # build reverse lookup: pattern -> character
     rev = {v: k for k, v in tbl.items()}
     result = []
     buf = ""
@@ -32,6 +32,19 @@ def braille_to_text(braille: str, lang: str) -> str:
             result.append(rev[buf])
             buf = ""
         elif len(buf) > 7:
-            # too long, reset buffer
             buf = ""
     return "".join(result)
+
+def text_to_braille_alpha(text: str, lang: str) -> str:
+    """
+    영문자(A–Z, a–z)만 남기고 나머지(숫자·특수·공백)는 제거한 뒤 점자로 변환.
+    """
+    filtered = re.sub(r"[^A-Za-z]", "", text)
+    return text_to_braille(filtered, lang)
+
+def text_to_braille_num_special(text: str, lang: str) -> str:
+    """
+    숫자(0–9)와 특수문자만 남기고 나머지(영문·공백)는 제거한 뒤 점자로 변환.
+    """
+    filtered = re.sub(r"[A-Za-z\s]", "", text)
+    return text_to_braille(filtered, lang)
