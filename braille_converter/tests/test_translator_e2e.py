@@ -1,17 +1,15 @@
-import unittest
+import pytest
 from braille_converter.common.translator import text_to_braille, braille_to_text
 
-class TestEnglishE2E(unittest.TestCase):
-    def test_roundtrip_letters(self):
-        txt = "HelloWorld"
-        b = text_to_braille(txt, lang="eng")
-        self.assertEqual(braille_to_text(b, lang="eng"), txt)
-
-    def test_numbers_and_punct(self):
-        txt = "Test, 123!"
-        b = text_to_braille(txt, lang="eng")
-        decoded = braille_to_text(b, lang="eng")
-        self.assertEqual(decoded, "Test,123!")
-
-if __name__ == "__main__":
-    unittest.main()
+@pytest.mark.parametrize("txt, expected", [
+    ("HelloWorld", "HelloWorld"),
+    ("Test, 123!", "Test,123!"),
+])
+def test_text_to_braille_roundtrip(txt, expected, braille_logger):
+    braille_logger.info(f"INPUT      → {txt!r}")
+    b = text_to_braille(txt, lang="eng")
+    braille_logger.info(f"BRAILLE    → {b}")
+    decoded = braille_to_text(b, lang="eng")
+    braille_logger.info(f"DECODED    → {decoded!r}")
+    assert decoded == expected
+    braille_logger.info("RESULT     → PASS\n")
